@@ -3,7 +3,7 @@ import { ProfilePage } from "@/features/auth/ui/ProfilePage/ProfilePage"
 import { PlaylistsPage } from "@/features/playlists/ui/PlaylistsPage.tsx/PlaylistsPage"
 import { TracksPage } from "@/features/tracks/ui/TracksPage"
 import { Route, Routes } from "react-router"
-import { PageNotFound } from "../components/PageNotFound/PageNotFound"
+import { PageNotFound } from "../components"
 
 export const Path = {
     Main: '/',
