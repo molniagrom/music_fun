@@ -1,25 +1,25 @@
 import type { CurrentUserReaction } from "@/common/enums/enums"
 import type { Images, Tag, User } from "@/common/types/types"
 
- 
+
 export type PlaylistsResponse = {
   data: PlaylistData[]
   meta: PlaylistMeta
 }
- 
+
 export type PlaylistData = {
   id: string
   type: 'playlists'
   attributes: PlaylistAttributes
 }
- 
+
 export type PlaylistMeta = {
   page: number
   pageSize: number
   totalCount: number
   pagesCount: number
 }
- 
+
 export type PlaylistAttributes = {
   title: string
   description: string
@@ -33,7 +33,7 @@ export type PlaylistAttributes = {
   user: User
   currentUserReaction: CurrentUserReaction
 }
- 
+
 // Arguments
 export type FetchPlaylistsArgs = {
   pageNumber?: number
@@ -44,4 +44,14 @@ export type FetchPlaylistsArgs = {
   tagsIds?: string[]
   userId?: string
   trackId?: string
+}
+
+export type CreatePlaylistArgs = {
+  title: string
+  description: string
+}
+export type UpdatePlaylistArgs = {
+  title: string
+  description: string
+  tagIds: string[]
 }
