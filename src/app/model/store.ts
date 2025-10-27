@@ -1,17 +1,17 @@
-import { playlistApi } from '@/features/playlists/api/playlistApi'
 import { configureStore } from '@reduxjs/toolkit'
 // Or from '@reduxjs/toolkit/query/react'
 import { setupListeners } from '@reduxjs/toolkit/query'
+import { baseApi } from '../api/baseApi'
 
 export const store = configureStore({
   reducer: {
     // Add the generated reducer as a specific top-level slice
-    [playlistApi.reducerPath]: playlistApi.reducer,
+    [baseApi.reducerPath]: baseApi.reducer,
   },
   // Adding the api middleware enables caching, invalidation, polling,
   // and other useful features of `rtk-query`.
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(playlistApi.middleware),
+    getDefaultMiddleware().concat(baseApi.middleware),
 })
 
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors
