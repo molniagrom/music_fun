@@ -1,13 +1,13 @@
 // https://musicfun.it-incubator.app/api/1.0/
 
 import { baseApi } from "@/app/api/baseApi";
-import type { CreatePlaylistArgs, PlaylistData, PlaylistsResponse, UpdatePlaylistArgs } from "./playlistsApi.types";
+import type { CreatePlaylistArgs, FetchPlaylistsArgs, PlaylistData, PlaylistsResponse, UpdatePlaylistArgs } from "./playlistsApi.types";
 import type { Images } from "@/common/types/types";
 
 export const playlistApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    fetchPlaylists: build.query<PlaylistsResponse, void>({
-      query: () => ({ url: `/playlists` }),
+    fetchPlaylists: build.query<PlaylistsResponse, FetchPlaylistsArgs>({
+      query: (params) => ({ url: `/playlists`, params }),
       providesTags: ["Playlist"],
     }),
 
