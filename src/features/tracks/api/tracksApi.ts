@@ -3,11 +3,6 @@ import type { FetchTracksResponse } from "./tracksApi.types";
 
 export const tracksApi = baseApi.injectEndpoints({
     endpoints: build => ({
-        // fetchTracks: build.query<FetchTracksResponse, void>({
-        //     query: () => ({
-        //         url: "/playlists/tracks",
-        //     })
-        // })
         fetchTracks: build.infiniteQuery<FetchTracksResponse, void, string | null>({
             infiniteQueryOptions: {
                 initialPageParam: null,
@@ -19,7 +14,23 @@ export const tracksApi = baseApi.injectEndpoints({
                 url: "/playlists/tracks",
                 params: { cursor: pageParam, paginationType: "cursor", pageSize: 5 }
             })
-        })
+        }),
+        // fetchTracks: build.infiniteQuery<FetchTracksResponse, void, number>({
+        //     infiniteQueryOptions: {
+        //       initialPageParam: 1,
+        //       getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+        //         return lastPageParam < (lastPage.meta as { pagesCount: number }).pagesCount
+        //           ? lastPageParam + 1
+        //           : undefined
+        //       },
+        //     },
+        //     query: ({ pageParam }) => {
+        //       return {
+        //         url: 'playlists/tracks',
+        //         params: { pageNumber: pageParam, pageSize: 10, paginationType: 'offset' },
+        //       }
+        //     },
+        //   }),
     })
 })
 
