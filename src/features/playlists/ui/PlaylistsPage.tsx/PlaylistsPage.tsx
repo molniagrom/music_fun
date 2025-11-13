@@ -1,10 +1,10 @@
 import { Pagination } from '@/common/components'
 import { useDebounceValue } from '@/common/hooks'
 import { CreatePlaylistForm } from '@/features/playlists/ui/CreatePlaylistForm/CreatePlaylistForm.tsx'
-import { PlaylistList } from '../PlaylistsList/PlaylistsList'
 import { type ChangeEvent, useState } from 'react'
-import s from './PlaylistsPage.module.css'
 import { useFetchPlaylistsQuery } from '../../api/playlistApi'
+import { PlaylistList } from '../PlaylistsList/PlaylistsList'
+import s from './PlaylistsPage.module.css'
 
 export const PlaylistsPage = () => {
   const [search, setSearch] = useState('')
@@ -14,6 +14,23 @@ export const PlaylistsPage = () => {
   const debounceSearch = useDebounceValue(search)
   const { data, isLoading } = useFetchPlaylistsQuery({ search: debounceSearch, pageNumber: currentPage, pageSize })
 
+  // useEffect(() => {
+  //   if (error) {
+  //     if ("status" in error) {
+  //       debugger
+  //       const errMsg = 'error' in error
+  //         ? error.error
+  //         : ((error.data as { error: string }).error) || ((error.data as { message: string }).message) || "Some error ocured"
+  //       toast(errMsg, { type: "error", theme: "colored" })
+
+  //     } else {
+  //       const errMsg = error.message || "Some error ocured"
+  //       toast(errMsg, { type: "error", theme: "colored" })
+  //     }
+  //   }
+  // }, [error])
+
+
   const changePageSizeHandler = (size: number) => {
     setCurrentPage(1)
     setPageSize(size)
@@ -22,6 +39,10 @@ export const PlaylistsPage = () => {
   const searchPlaylistHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.currentTarget.value)
     setCurrentPage(1)
+  }
+
+  if (isLoading) {
+    return <h1>Skeleton loader ...</h1>
   }
 
   return (
