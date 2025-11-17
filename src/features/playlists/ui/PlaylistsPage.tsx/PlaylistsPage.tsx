@@ -14,23 +14,6 @@ export const PlaylistsPage = () => {
   const debounceSearch = useDebounceValue(search)
   const { data, isLoading } = useFetchPlaylistsQuery({ search: debounceSearch, pageNumber: currentPage, pageSize })
 
-  // useEffect(() => {
-  //   if (error) {
-  //     if ("status" in error) {
-  //       debugger
-  //       const errMsg = 'error' in error
-  //         ? error.error
-  //         : ((error.data as { error: string }).error) || ((error.data as { message: string }).message) || "Some error ocured"
-  //       toast(errMsg, { type: "error", theme: "colored" })
-
-  //     } else {
-  //       const errMsg = error.message || "Some error ocured"
-  //       toast(errMsg, { type: "error", theme: "colored" })
-  //     }
-  //   }
-  // }, [error])
-
-
   const changePageSizeHandler = (size: number) => {
     setCurrentPage(1)
     setPageSize(size)

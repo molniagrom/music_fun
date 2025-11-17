@@ -1,8 +1,8 @@
 // https://musicfun.it-incubator.app/api/1.0/
 
 import { baseApi } from "@/app/api/baseApi";
-import type { CreatePlaylistArgs, FetchPlaylistsArgs, PlaylistData, PlaylistsResponse, UpdatePlaylistArgs } from "./playlistsApi.types";
 import type { Images } from "@/common/types/types";
+import type { CreatePlaylistArgs, FetchPlaylistsArgs, PlaylistData, PlaylistsResponse, UpdatePlaylistArgs } from "./playlistsApi.types";
 
 export const playlistApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -29,11 +29,52 @@ export const playlistApi = baseApi.injectEndpoints({
     }),
 
     updatePlaylist: build.mutation<void, { playlistId: string, body: UpdatePlaylistArgs }>({
-      query: ({ playlistId, body }) => ({
-        method: "put",
-        url: `/playlists/${playlistId}`,
-        body
-      }),
+      onQueryStarted: async ({ body, playlistId }, { dispatch, queryFulfilled, getState }) => {
+
+        const args = playlistApi.util.selectCachedArgsForQuery(getState(), 'fetchPlaylists')
+
+        const patchCollections: any[] = []
+
+        args.forEach((arg) => {
+          patchCollections.push(
+            dispatch(
+              playlistApi.util.updateQueryData(
+                'fetchPlaylists',
+                {
+                  pageNumber: arg.pageNumber,
+                  pageSize: arg.pageSize,
+                  search: arg.search
+                },
+                (state) => {
+                  console.log("2");
+                  const index = state.data.findIndex(playlist => playlist.id === playlistId)
+                  if (index !== -1) {
+                    state.data[index].attributes = { ...state.data[index].attributes, ...body }
+                  }
+                }),
+            )
+
+          )
+        })
+
+        try {
+          await queryFulfilled
+        } catch (e) {
+          patchCollections.forEach((patchCollection) => {
+            patchCollection.undo()
+          })
+        }
+
+      },
+
+      query: ({ playlistId, body }) => {
+        return {
+          method: "put",
+          url: `/playlists/${playlistId}`,
+          body
+        }
+      },
+
       invalidatesTags: ['Playlist'],
     }),
 
