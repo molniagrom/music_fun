@@ -1,22 +1,41 @@
 // https://musicfun.it-incubator.app/api/1.0/
 
 import { baseApi } from "@/app/api/baseApi";
-import type { Images } from "@/common/types/types";
-import type { CreatePlaylistArgs, FetchPlaylistsArgs, PlaylistData, PlaylistsResponse, UpdatePlaylistArgs } from "./playlistsApi.types";
+import type { Cover, Images } from "@/common/types/types";
+import { errorToast } from "@/common/utils";
+import { playlistCreateResponseSchema, playlistsResponseSchema } from "../model/playlists.schemas";
+import type { CreatePlaylistArgs, FetchPlaylistsArgs, PlaylistData, UpdatePlaylistArgs } from "./playlistsApi.types";
+import { imagesSchema } from "@/common/schemas";
 
 export const playlistApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    fetchPlaylists: build.query<PlaylistsResponse, FetchPlaylistsArgs>({
-      query: (params) => ({ url: `/playlists`, params }),
+    fetchPlaylists: build.query({
+      query: (params: FetchPlaylistsArgs) => ({ url: `/playlists`, params }),
+      responseSchema: playlistsResponseSchema,
+      catchSchemaFailure: (error) => {
+        errorToast("Zod error, details in the console", error.issues)
+        return {
+          status: 'CUSTOM_ERROR',
+          error: 'Schema validation failed ',
+        }
+      },
       providesTags: ["Playlist"],
     }),
 
-    createPlaylist: build.mutation<{ data: PlaylistData }, CreatePlaylistArgs>({
-      query: (body) => ({
+    createPlaylist: build.mutation({
+      query: (body: CreatePlaylistArgs) => ({
         method: "post",
         url: `/playlists`,
         body
       }),
+      responseSchema: playlistCreateResponseSchema,
+      catchSchemaFailure: (error) => {
+        errorToast("Zod error, details in the console", error.issues)
+        return {
+          status: 'CUSTOM_ERROR',
+          error: 'Schema validation failed ',
+        }
+      },
       invalidatesTags: ['Playlist'],
     }),
 
@@ -82,8 +101,15 @@ export const playlistApi = baseApi.injectEndpoints({
       query: ({ playlistId, file }) => {
         const formData = new FormData()
         formData.append("file", file)
-
         return ({ method: "post", url: `/playlists/${playlistId}/images/main`, body: formData })
+      },
+      responseSchema: imagesSchema,
+      catchSchemaFailure: (error) => {
+        errorToast("Zod error, details in the console", error.issues)
+        return {
+          status: 'CUSTOM_ERROR',
+          error: 'Schema validation failed ',
+        }
       },
       invalidatesTags: ['Playlist'],
     }),
