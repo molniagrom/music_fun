@@ -1,24 +1,17 @@
 // https://musicfun.it-incubator.app/api/1.0/
 
 import { baseApi } from "@/app/api/baseApi";
-import type { Cover, Images } from "@/common/types/types";
-import { errorToast } from "@/common/utils";
-import { playlistCreateResponseSchema, playlistsResponseSchema } from "../model/playlists.schemas";
-import type { CreatePlaylistArgs, FetchPlaylistsArgs, PlaylistData, UpdatePlaylistArgs } from "./playlistsApi.types";
 import { imagesSchema } from "@/common/schemas";
+import type { Images } from "@/common/types/types";
+import { playlistCreateResponseSchema, playlistsResponseSchema } from "../model/playlists.schemas";
+import type { CreatePlaylistArgs, FetchPlaylistsArgs, UpdatePlaylistArgs } from "./playlistsApi.types";
+import { withZodCatch } from "@/common/utils";
 
 export const playlistApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     fetchPlaylists: build.query({
       query: (params: FetchPlaylistsArgs) => ({ url: `/playlists`, params }),
-      responseSchema: playlistsResponseSchema,
-      catchSchemaFailure: (error) => {
-        errorToast("Zod error, details in the console", error.issues)
-        return {
-          status: 'CUSTOM_ERROR',
-          error: 'Schema validation failed ',
-        }
-      },
+      ...withZodCatch(playlistsResponseSchema),
       providesTags: ["Playlist"],
     }),
 
@@ -28,14 +21,7 @@ export const playlistApi = baseApi.injectEndpoints({
         url: `/playlists`,
         body
       }),
-      responseSchema: playlistCreateResponseSchema,
-      catchSchemaFailure: (error) => {
-        errorToast("Zod error, details in the console", error.issues)
-        return {
-          status: 'CUSTOM_ERROR',
-          error: 'Schema validation failed ',
-        }
-      },
+      ...withZodCatch(playlistCreateResponseSchema),
       invalidatesTags: ['Playlist'],
     }),
 
@@ -103,14 +89,7 @@ export const playlistApi = baseApi.injectEndpoints({
         formData.append("file", file)
         return ({ method: "post", url: `/playlists/${playlistId}/images/main`, body: formData })
       },
-      responseSchema: imagesSchema,
-      catchSchemaFailure: (error) => {
-        errorToast("Zod error, details in the console", error.issues)
-        return {
-          status: 'CUSTOM_ERROR',
-          error: 'Schema validation failed ',
-        }
-      },
+      ...withZodCatch(imagesSchema),
       invalidatesTags: ['Playlist'],
     }),
 
