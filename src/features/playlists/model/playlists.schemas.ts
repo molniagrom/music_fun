@@ -11,12 +11,11 @@ export const createPlaylistSchema = z.object({
 })
 
 export const playlistMetaSchema = z.object({
-    // page: z.string(),
     page: z.int().positive(),
     pageSize: z.int().positive(),
     totalCount: z.int().positive(),
     pagesCount: z.int().positive(),
-})
+  })
 
 export const playlistAttributesSchema = z.object({
     title: z.string(),
@@ -30,7 +29,7 @@ export const playlistAttributesSchema = z.object({
     images: imagesSchema,
     user: userSchema,
     currentUserReaction: currentUserReactionSchema,
-})
+  })
 
 export const playlistDataSchema = z.object({
     id: z.string(),
@@ -45,5 +44,4 @@ export const playlistsResponseSchema = z.object({
 
 export const playlistCreateResponseSchema = z.object({
     data: playlistDataSchema,
-    title: z.string()
 }) 

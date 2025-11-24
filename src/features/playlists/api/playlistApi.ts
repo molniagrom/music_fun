@@ -4,14 +4,43 @@ import { baseApi } from "@/app/api/baseApi";
 import { imagesSchema } from "@/common/schemas";
 import type { Images } from "@/common/types/types";
 import { playlistCreateResponseSchema, playlistsResponseSchema } from "../model/playlists.schemas";
-import type { CreatePlaylistArgs, FetchPlaylistsArgs, UpdatePlaylistArgs } from "./playlistsApi.types";
+import type { CreatePlaylistArgs, FetchPlaylistsArgs, PlaylistCreatedEvent, UpdatePlaylistArgs } from "./playlistsApi.types";
 import { withZodCatch } from "@/common/utils";
+import { io } from "socket.io-client";
+import { SOCKET_EVENTS } from "@/common/constants";
+import { subscribeToEvent } from "@/common/socket";
 
 export const playlistApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     fetchPlaylists: build.query({
-      query: (params: FetchPlaylistsArgs) => ({ url: `/playlists`, params }),
+      query: (params: FetchPlaylistsArgs) => {
+        return {
+          url: `/playlists`,
+          params
+        }
+      },
       ...withZodCatch(playlistsResponseSchema),
+      keepUnusedDataFor: 0,
+      onCacheEntryAdded: async (_arg, { cacheDataLoaded, updateCachedData, cacheEntryRemoved }) => {
+
+        await cacheDataLoaded // waiting for the playlist data to finish loading into the cache
+        
+       const unsubcribe = subscribeToEvent<PlaylistCreatedEvent>(SOCKET_EVENTS.PLAYLIST_CREATED, (msg) => {
+          const newPlaylist = msg.payload.data
+          updateCachedData((state) => {
+            state.data.pop()
+            state.data.unshift(newPlaylist)
+            state.meta.totalCount = state.meta.totalCount + 1
+            state.meta.pagesCount = Math.ceil(state.meta.totalCount / state.meta.pageSize)
+          })
+          // dispatch(playlistApi.util.invalidateTags(["Playlist"]))
+        })
+
+        await cacheEntryRemoved
+        unsubcribe()
+        // !
+
+      },
       providesTags: ["Playlist"],
     }),
 

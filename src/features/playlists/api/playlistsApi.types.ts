@@ -29,4 +29,11 @@ export type UpdatePlaylistArgs = {
   tagIds: string[]
 }
 
+// WebSocket Events
+export type PlaylistCreatedEvent = {
+  type: 'tracks.playlist-created'
+  payload: {
+    data: PlaylistData
+  }
+}
 
