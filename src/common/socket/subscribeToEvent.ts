@@ -10,5 +10,4 @@ export const subscribeToEvent = <T>(event: SocketEvents, callback: (data: T) => 
         socket.off(event, callback)
     }
 
-
 }

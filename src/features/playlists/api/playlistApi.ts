@@ -1,14 +1,13 @@
 // https://musicfun.it-incubator.app/api/1.0/
 
 import { baseApi } from "@/app/api/baseApi";
-import { imagesSchema } from "@/common/schemas";
-import type { Images } from "@/common/types/types";
-import { playlistCreateResponseSchema, playlistsResponseSchema } from "../model/playlists.schemas";
-import type { CreatePlaylistArgs, FetchPlaylistsArgs, PlaylistCreatedEvent, UpdatePlaylistArgs } from "./playlistsApi.types";
-import { withZodCatch } from "@/common/utils";
-import { io } from "socket.io-client";
 import { SOCKET_EVENTS } from "@/common/constants";
+import { imagesSchema } from "@/common/schemas";
 import { subscribeToEvent } from "@/common/socket";
+import type { Images } from "@/common/types/types";
+import { withZodCatch } from "@/common/utils";
+import { playlistCreateResponseSchema, playlistsResponseSchema } from "../model/playlists.schemas";
+import type { CreatePlaylistArgs, FetchPlaylistsArgs, PlaylistCreatedEvent, PlaylistUpdatedEvent, UpdatePlaylistArgs } from "./playlistsApi.types";
 
 export const playlistApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -24,22 +23,31 @@ export const playlistApi = baseApi.injectEndpoints({
       onCacheEntryAdded: async (_arg, { cacheDataLoaded, updateCachedData, cacheEntryRemoved }) => {
 
         await cacheDataLoaded // waiting for the playlist data to finish loading into the cache
-        
-       const unsubcribe = subscribeToEvent<PlaylistCreatedEvent>(SOCKET_EVENTS.PLAYLIST_CREATED, (msg) => {
-          const newPlaylist = msg.payload.data
-          updateCachedData((state) => {
-            state.data.pop()
-            state.data.unshift(newPlaylist)
-            state.meta.totalCount = state.meta.totalCount + 1
-            state.meta.pagesCount = Math.ceil(state.meta.totalCount / state.meta.pageSize)
+
+        const unsubcribes = [
+          subscribeToEvent<PlaylistCreatedEvent>(SOCKET_EVENTS.PLAYLIST_CREATED, (msg) => {
+            const newPlaylist = msg.payload.data
+            updateCachedData((state) => {
+              state.data.pop()
+              state.data.unshift(newPlaylist)
+              state.meta.totalCount = state.meta.totalCount + 1
+              state.meta.pagesCount = Math.ceil(state.meta.totalCount / state.meta.pageSize)
+            })
+          }),
+          subscribeToEvent<PlaylistUpdatedEvent>(SOCKET_EVENTS.PLAYLIST_UPDATED, (msg) => {
+            const updatePlaylist = msg.payload.data
+            updateCachedData((state) => {
+              const index = state.data.findIndex(playlist => playlist.id === updatePlaylist.id)
+              if (index !== -1) {
+                state.data[index] = { ...state.data[index], ...updatePlaylist }
+              }
+            })
           })
-          // dispatch(playlistApi.util.invalidateTags(["Playlist"]))
-        })
+        ]
 
         await cacheEntryRemoved
-        unsubcribe()
-        // !
-
+        unsubcribes.forEach(unsubcribe => unsubcribe())
+     
       },
       providesTags: ["Playlist"],
     }),
